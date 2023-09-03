@@ -60,8 +60,8 @@ export default async function createAviator(canvas) {
     // 飛機的energy
     energy: 100,
     // 撞到飛機或石頭要扣血的值
-    stoneCollisionValue: 5,
-    coinCollisionValue: 0.5,
+    stoneCollisionValue: 10,
+    coinCollisionValue: 1,
    
     // 轉一圈預設距離
     ratioSpeedDistance:50,
@@ -203,7 +203,7 @@ coinsHolder.createCoins()
   // 帶入滑鼠游標位置去控制飛機在3D場景位置
   function upadteAirPlan() {
     const targetX = normalizeLimit(mouseMovPos.x,-1,1,-200,300) + scene.gameData.collisionSpeedX
-    const targetY = normalizeLimit(mouseMovPos.y,-1,1,-100,150) + scene.gameData.collisionSpeedY
+    const targetY = normalizeLimit(mouseMovPos.y,-1,1,-200,200) + scene.gameData.collisionSpeedY
 
     // 飛機實體位置調整
     airPlaneModel.position.x = targetX

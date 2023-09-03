@@ -33,6 +33,10 @@
         </div>
       </div>
     </header>
+    <div class="camera-option">
+      <div class="option-normal active">Normal cam</div>
+      <div class="option-follow">Follow cam</div>
+    </div>
     <div id="canvas"></div>
   </main>
 </template>
@@ -67,7 +71,7 @@ header {
     flex-direction: column; */
   } 
   h2 {
-    font-size: 0.85rem;
+    font-size: 1.15rem;
     color: #b8d819;
     letter-spacing: 1rem;
     text-transform: uppercase;
@@ -171,33 +175,30 @@ header {
   width: 100%;
   height: 100%;
 }
-
-#button {
-  background: greenyellow;
-  width: 80px;
-  height: 50px;
-  opacity: 0.5;
-}
-
-#progress-bar {
+.camera-option {
   position: absolute;
-  width: 400px;
-  height: 16px;
+  width: 250px;
+  padding: 5px ;
   top: 5%;
-  left: 50%;
-  margin-left: -200px;
-  margin-top: -8px;
+  left: 10%;
+  display: flex;
+  justify-content: space-around;
+  border: 2px solid #edce9f;
   border-radius: 8px;
-  border: 1px solid #009999;
-  overflow: hidden;
-}
-
-#loading-progress {
-  height: 100%;
-  width: 20px;
-  background: #00ffff;
-  color: #00ffff;
-  line-height: 15px;
+  font-size: 1.1rem;
+  .active {
+    border: 2px solid #6e675c;
+    background-color: #b8d819;
+    border-radius: 12px;
+    padding: 2px 4px;
+  }
+  .option-follow,.normal-follow {
+    padding: 2px 4px;
+    text-align: center;
+    border: 2px solid #6e675c;
+    border-radius: 12px;
+    width: 100px;
+  }
 }
 </style>
 
