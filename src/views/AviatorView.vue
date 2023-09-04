@@ -11,18 +11,18 @@
       <h2>Fly to the End</h2>
       <div class="score">
         <div class="score_content" id="level">
-          <div class="score_label">LEVEL</div>
+          <div class="score_label">Level</div>
           <div class="score_circle">
             <!--實作進度圓餅圖-->
            <svg width="80" height="80">
             <circle r="30" cx="40" cy="40" class="circle"/>
            </svg>
-             <div class="score_level_value">1</div>
+             <div class="score_level_value">{{ gameLevel }}</div>
           </div>
         </div>
         <div class="score_content" id="distance">
-          <div class="score_label">DISTANCE</div>
-          <div class="score_distance_value">1552</div> km
+          <div class="score_label">Distance</div>
+          <div class="score_distance_value">{{ flyDistance }}</div> km
         </div>
         <div class="score_content" id="energy">
           <div class="score_label">ENERGY</div>
@@ -34,22 +34,31 @@
       </div>
     </header>
     <div class="camera-option">
-      <div class="option-normal active">Normal cam</div>
-      <div class="option-follow">Follow cam</div>
+      <div class="option-normal" :class="[cameraOption==='normal'?'active': '' ]" @click="changeCamera('normal')">Normal cam</div>
+      <div class="option-follow" :class="[cameraOption === 'follow' ? 'active' : '']"  @click="changeCamera('follow')">Follow cam</div>
     </div>
     <div id="canvas"></div>
   </main>
 </template>
 <script setup>
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import createAviator from "../threeScene/createAviator"
+import { useStore } from 'vuex'
 // import createCannonScene from "../threeScene/createCannonScene";
+
+const store = useStore()
 onMounted(() => {
   const canvas = document.getElementById('canvas');
   console.log("canvasDom", canvas)
   createAviator(canvas)
 })
 
+const cameraOption = computed(()=>store.state.cameraOption)
+function changeCamera(option) {
+  store.commit("changeCamera",option)
+}
+const gameLevel = computed(() => store.state.gameLevel)
+const flyDistance = computed(()=> store.state.flyDistance)
 </script>
 <style lang="scss" scoped>
 main {
@@ -62,7 +71,7 @@ header {
   top: 2.5%;
   left: 50%;
   font-family: 'Playfair Display';
-  color: #d1b790;
+  color: #c36523;
   transform: translate(-50%,0);
   font-weight: 400;
   h1  {
@@ -72,7 +81,7 @@ header {
   } 
   h2 {
     font-size: 1.15rem;
-    color: #b8d819;
+    color: #9ACD32;
     letter-spacing: 1rem;
     text-transform: uppercase;
     font-weight: 700;
@@ -99,10 +108,11 @@ header {
   justify-content: space-around;
   margin-top: 10px ;
   .score_content {
-     color: #edce9f;
+     color: #df8f0d;
      padding: 0 2rem;
      text-align: center;
      min-width: 100px;
+     font-weight: 700;
      /*第二個block設定左右邊界*/
      &:nth-child(2) {
       border-left: 2px solid #edce9f;
@@ -110,7 +120,9 @@ header {
      }
      
      .score_label {
-      opacity: 0.5;
+      opacity: 0.8;
+      color: #c36523;
+      font-weight: 500;
      }
      /*level 圓餅svg*/
      .score_circle {
@@ -177,7 +189,7 @@ header {
 }
 .camera-option {
   position: absolute;
-  width: 250px;
+  width: 270px;
   padding: 5px ;
   top: 5%;
   left: 10%;
@@ -192,12 +204,13 @@ header {
     border-radius: 12px;
     padding: 2px 4px;
   }
-  .option-follow,.normal-follow {
+  .option-follow,.option-normal {
     padding: 2px 4px;
     text-align: center;
     border: 2px solid #6e675c;
     border-radius: 12px;
-    width: 100px;
+    width: 120px;
+    cursor: pointer;
   }
 }
 </style>

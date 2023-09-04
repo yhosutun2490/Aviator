@@ -32,7 +32,7 @@ class MeteteoRitesHolder {
     this.scene = scene
     this.world = world // 物理引擎世界
     this.stonesInWorld = []
-    this.stonesHeightRatio = [0.8,0.6,0.9,0.6,0.75,0.5,0.55,0.89,0.65]
+    this.stonesHeightRatio = [0.8,0.6,0.9,0.6,0.75,0.6,0.55,0.89,0.65]
   }
   createMeteorites() {
     // 先清掉舊有scene和world物理世界的隕石
@@ -107,7 +107,7 @@ class MeteteoRitesHolder {
         // 掉到海裡再調整隕石下一批出現的高度
         if (Math.cos(stone.angle)> 0.1 && Math.cos(stone.angle)>0.999999) {
           console.log("隕石變換高度")
-          this.scene.gameData.stonesMovePosY = Math.floor(Math.random()*(200+ 150 + 1) -250)
+          this.scene.gameData.stonesMovePosY = Math.floor(Math.random()*(200+ 150 + 1) -200)
          }
           stone.mesh.position.x =  Math.cos(stone.angle)*stone.distance +this.scene.gameData.stonesMovePosY*1*index
           stone.angle += 0.0015*(this.scene.gameData.deltaTime/1000)*0.6

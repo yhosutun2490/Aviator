@@ -11,9 +11,8 @@ import createSky from '../utils/createSky';
 import createMeteorites from '../utils/createMeteorite';
 import createCoin from '../utils/createCoin';
 import createParticle from '../utils/createParticles';
-
-
-
+// Vuex store
+import store from '../store/store'
 
 export default async function createAviator(canvas) {
   console.log("createScene",canvas.offsetWidth,canvas.offsetHeight)
@@ -66,7 +65,7 @@ export default async function createAviator(canvas) {
     // 轉一圈預設距離
     ratioSpeedDistance:50,
     // 遊戲狀態
-    gameSate: "playing"
+    gameStatus: "playing"
   }
 
 
@@ -78,10 +77,10 @@ export default async function createAviator(canvas) {
   // scene.add(ambient);
  
 
-  const axesHelper = new THREE.AxesHelper(600);
+  // const axesHelper = new THREE.AxesHelper(600);
   // xyz helper顏色 x=紅 y=綠 z=藍
-  axesHelper.setColors ("#FF0000", "#009100","#0000E3")
-  scene.add(axesHelper);
+  // axesHelper.setColors ("#FF0000", "#009100","#0000E3")
+  // scene.add(axesHelper);
 
  // 創建海洋
  const sea = createSea(scene)
@@ -152,7 +151,7 @@ coinsHolder.createCoins()
   // 設備像素比
   renderer.setPixelRatio(window.devicePixelRatio)
   // 渲染器背景顏色
-  renderer.setClearColor(0x445588, 1)
+  renderer.setClearColor("#ADD8E6", 1)
   renderer.outputColorSpace = THREE.SRGBColorSpace
   // 背景透明度 預設是false
   renderer.setClearAlpha(0.8);
@@ -171,9 +170,10 @@ coinsHolder.createCoins()
   controls.minDistance = 100
   controls.maxDistance = 700
   // 左右旋轉上限
-  controls.maxAzimuthAngle = 5.0
-  controls.minAzimuthAngle = 0.0
-
+  // controls.maxAzimuthAngle = 5.0
+  // controls.minAzimuthAngle = 0.0
+  
+  
 
   // const clock = new THREE.Clock(); // 獲取renderLoop時間間隔
   const cannonDebugRenderer = new CannonDebugRenderer(scene, world)
@@ -204,11 +204,20 @@ coinsHolder.createCoins()
   function upadteAirPlan() {
     const targetX = normalizeLimit(mouseMovPos.x,-1,1,-200,300) + scene.gameData.collisionSpeedX
     const targetY = normalizeLimit(mouseMovPos.y,-1,1,-200,200) + scene.gameData.collisionSpeedY
-
-    // 飛機實體位置調整
-    airPlaneModel.position.x = targetX
-    airPlaneModel.position.y = targetY
-    airPlaneModel.rotateX(scene.gameData.collisionAngle)
+     // 遊戲game over
+    if (scene.gameData.gameStatus === 'gameOver') {
+      //飛機墜落
+      document.removeEventListener("mousemove",handleMouseMove,false)
+      airPlaneModel.rotation.z += (-Math.PI/2 - airPlaneModel.rotation.z)
+      airPlaneModel.rotation.x += (-Math.PI/2 - airPlaneModel.rotation.z)
+      airPlaneModel.position.x += 1
+      airPlaneModel.position.y -= 3
+    } else {
+        // 飛機實體位置調整
+      airPlaneModel.position.x = targetX
+      airPlaneModel.position.y = targetY
+      airPlaneModel.rotateX(scene.gameData.collisionAngle)
+    }
   }
   // 向量正規化轉換 需要複習這段原理~~~
   function normalizeLimit(pos,posMin,posMax,VecMin,VecMax) {
@@ -295,9 +304,6 @@ coinsHolder.createCoins()
 function removeEnergy() {
   scene.gameData.energy -= scene.gameData.stoneCollisionValue
   scene.gameData.energy = Math.max(0,scene.gameData.energy)
-  if (scene.gameData.energy<=0) {
-    scene.gameData.gameOver = true
-  }
 }
 function addEnergy() {
   scene.gameData.energy += scene.gameData.coinCollisionValue
@@ -307,6 +313,7 @@ function addEnergy() {
 function updateEnergyBar() {
   const energyBar = document.querySelector('.energy_bar')
   energyBar.style.right = (100-scene.gameData.energy) +"%"
+  store.commit("updateEnergy",scene.gameData.energy)
   // 根據血量設定energy bar呈現顏色
   if (scene.gameData.energy<=50) {
      energyBar.style.backgroundColor = 'yellow'
@@ -317,15 +324,16 @@ function updateEnergyBar() {
   if (scene.gameData.energy >50) {
     energyBar.style.backgroundColor = 'green'
   }
+  
 }
 function updateDistance() {
-  const distanceValueHTML = document.querySelector('.score_distance_value')
   scene.gameData.flyDistance += scene.gameData.gameSpeed*scene.gameData.deltaTime*scene.gameData.ratioSpeedDistance
-  distanceValueHTML.innerHTML = Math.floor(scene.gameData.flyDistance)
+  store.commit('updateDistance', Math.floor(scene.gameData.flyDistance))
 }
 // 飛行500km為一個level
 function updateLevel() {
   const levelValueHTML = document.querySelector('.score_level_value')
+  store.commit('updateLevel',scene.gameData.gameLevel)
   levelValueHTML.innerHTML = scene.gameData.gameLevel
    // 如果達到進入下一階段的距離
    if (Math.floor(scene.gameData.flyDistance)%scene.gameData.distanceForLevelUpdate === 0 && Math.floor(scene.gameData.flyDistance) > scene.gameData.levelLastUpdateDistance) {
@@ -333,17 +341,18 @@ function updateLevel() {
      scene.gameData.levelLastUpdateDistance = Math.floor(scene.gameData.flyDistance)
      // level+1
      scene.gameData.gameLevel ++
+     store.commit('updateLevel',scene.gameData.gameLevel)
      stonesHolder.createMeteorites()
      coinsHolder.createCoins()
      scene.gameData.oldTime = new Date().getTime()
-     // 等級提升 隕石增加
-    
-    //  scene.gameData.timeExtra += 100
    }
   // 外圍圈圈css設定
   const ratio = (Math.floor(scene.gameData.flyDistance)-scene.gameData.levelLastUpdateDistance)*(189/scene.gameData.distanceForLevelUpdate)
   const circle = document.querySelector('.circle')
   circle.style.strokeDasharray = `${ratio} 189`
+   if (scene.gameData.energy<=0) {
+    scene.gameData.gameStatus = "gameOver" 
+  }
 }
 
 const clock = new THREE.Clock(); // 時間數據
@@ -356,6 +365,20 @@ function renderLoop() {
   // 飛機撞擊後逐漸導正
   if( airPlaneModel.rotation.x>0) {
      airPlaneModel.rotateX(-Math.PI/200)
+  }
+  // 切換相機角度
+  if (store.state.cameraOption==="follow") {
+    console.log("follow cam")
+    const relativeCameraOffset = new THREE.Vector3(0, 0, 0);  
+    const cameraOffset = relativeCameraOffset.applyMatrix4(airPlaneModel.matrixWorld );  
+    camera.position.x = cameraOffset.x - 300;  
+    camera.position.y = cameraOffset.y + 100;
+    camera.position.z = cameraOffset.z - 100;
+
+  controls.target = new THREE.Vector3(airPlaneModel.position.x,airPlaneModel.position.y, airPlaneModel.position.z)
+  } else if (store.state.cameraOption==="normal") {
+      controls.target = new THREE.Vector3(0,0,0)
+      camera.position.set(0, -50, 500);
   }
    
 
@@ -374,7 +397,7 @@ function renderLoop() {
     coinsHolder.rotate()
  
 
-    cannonDebugRenderer.update()
+    // cannonDebugRenderer.update()
     // const delta = Math.min(clock, 0.5)
     const timeStemp = 14/1000
     controls.update()
@@ -437,7 +460,7 @@ function renderLoop() {
 
     // 遊戲速度控制
     scene.gameData.speed += scene.gameData.gameBaseSpeed
-    // 遊戲game over
+   
     
 	}
 if (WebGL.isWebGLAvailable()) {

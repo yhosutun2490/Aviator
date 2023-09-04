@@ -51,8 +51,8 @@ class CoinsHolder {
       
     }
 
-    // 產生的碎片數隨機產生 (1~10個碎片)
-    const num_Coins = 1+Math.floor(Math.random()*10)
+    // 產生的碎片數隨機產生 (1~8個碎片)
+    const num_Coins = 1+ Math.floor(Math.random()*7)
     // 碎片距離
     const distance = 800 + 150 + (Math.random()*2-1)*150
     // 碎片擺盪幅度
