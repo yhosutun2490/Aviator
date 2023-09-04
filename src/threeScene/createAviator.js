@@ -32,42 +32,44 @@ export default async function createAviator(canvas) {
   const camera = new THREE.PerspectiveCamera(70,canvas.offsetWidth  / canvas.offsetHeight, 1,2000); 
 
   // 遊戲狀態資料
-  scene.gameData = {
-    meteoritesPool:[],
-    coinsPool: [],
-    deltaTime: 0, // 遊戲經過時間
-    newTime: new Date().getTime(),
-    oldTime: new Date().getTime(),
-    timeExtra: 0,
-    // 遊戲level
-    gameLevel: 1,
-    gameSpeed: 0.0000001,
-    gameBaseSpeed: 0.0000035,
-    levelLastUpdateDistance:0,
-    distanceForLevelUpdate:300,
-     // 飛行距離
-    flyDistance: 0,
+  // scene.gameData = {
+  //   meteoritesPool:[],
+  //   coinsPool: [],
+  //   deltaTime: 0, // 遊戲經過時間
+  //   newTime: new Date().getTime(),
+  //   oldTime: new Date().getTime(),
+  //   timeExtra: 0,
+  //   // 遊戲level
+  //   gameLevel: 1,
+  //   gameSpeed: 0.0000001,
+  //   gameBaseSpeed: 0.0000035,
+  //   levelLastUpdateDistance:0,
+  //   distanceForLevelUpdate:300,
+  //    // 飛行距離
+  //   flyDistance: 0,
 
-    // 被隕石撞到的參數
-    collisionSpeedX:0,
-    collisionSpeedY:0,
-    collisionAngle:0,
-    // 恢復碎片飛行的高度
-    coinsMovePosY:80,
-    // 隕石飛行高度
-    stonesMovePosY: 50,
-    // 飛機的energy
-    energy: 100,
-    // 撞到飛機或石頭要扣血的值
-    stoneCollisionValue: 10,
-    coinCollisionValue: 1,
+  //   // 被隕石撞到的參數
+  //   collisionSpeedX:0,
+  //   collisionSpeedY:0,
+  //   collisionAngle:0,
+  //   // 恢復碎片飛行的高度
+  //   coinsMovePosY:80,
+  //   // 隕石飛行高度
+  //   stonesMovePosY: 50,
+  //   // 飛機的energy
+  //   energy: 100,
+  //   // 撞到飛機或石頭要扣血的值
+  //   stoneCollisionValue: 10,
+  //   coinCollisionValue: 1,
    
-    // 轉一圈預設距離
-    ratioSpeedDistance:50,
-    // 遊戲狀態
-    gameStatus: "playing"
-  }
+  //   // 轉一圈預設距離
+  //   ratioSpeedDistance:50,
+  //   // 遊戲狀態
+  //   gameStatus: "playing"
+  // }
 
+
+  
 
   // 使用者滑鼠移動位置
   let mouseMovPos = {x:0 ,y:0}
@@ -92,7 +94,8 @@ export default async function createAviator(canvas) {
   // 創建飛機
   // const airPlane = createAirPlane(scene)
 
-  // 載入飛機模型
+ // 載入飛機模型
+
 await loadingFbxModel()
 const airPlaneModel =  scene.getObjectByName('airplane_model')
 const modelPointLight = scene.getObjectByName('Point')
@@ -101,7 +104,9 @@ console.log("飛機模型",airPlaneModel,"點光",modelPointLight)
 airPlaneModel.position.x = 0
 airPlaneModel.position.y = 0
 airPlaneModel.position.z = 0
-airPlaneModel.rotation.z = Math.PI/6
+
+
+restartGame()
 
 // 飛機加入物理世界
 // const planeShape =  new CANNON.Box(new CANNON.Vec3(80, 30, 50))
@@ -200,20 +205,63 @@ coinsHolder.createCoins()
     mouseMovPos = {x:transformClientX ,y:transformClientY}
     // console.log("滑鼠座標",event.clientX,event.clientY)
   }
+
+  function restartGame() {
+    scene.gameData = {
+    meteoritesPool:[],
+    coinsPool: [],
+    deltaTime: 0, // 遊戲經過時間
+    newTime: new Date().getTime(),
+    oldTime: new Date().getTime(),
+    timeExtra: 0,
+    // 遊戲level
+    gameLevel: 1,
+    gameSpeed: 0.0000001,
+    gameBaseSpeed: 0.0000035,
+    levelLastUpdateDistance:0,
+    distanceForLevelUpdate:300,
+     // 飛行距離
+    flyDistance: 0,
+
+    // 被隕石撞到的參數
+    collisionSpeedX:0,
+    collisionSpeedY:0,
+    collisionAngle:0,
+    // 恢復碎片飛行的高度
+    coinsMovePosY:80,
+    // 隕石飛行高度
+    stonesMovePosY: 50,
+    // 飛機的energy
+    energy: 100,
+    // 撞到飛機或石頭要扣血的值
+    stoneCollisionValue: 10,
+    coinCollisionValue: 1,
+   
+    // 轉一圈預設距離
+    ratioSpeedDistance:50,
+    // 遊戲狀態
+    gameStatus: "playing",
+  }
+    store.commit('updateGameStatus',"playing")
+    // 重新調整飛機位置/rotate角度
+    airPlaneModel.position.x = 0
+    airPlaneModel.position.y = 0
+    airPlaneModel.position.z = 0
+    // matrix 恢復預設
+    airPlaneModel.rotateZ(Math.PI/6)
+
+    // 補滿血條energy
+    updateEnergyBar()
+     
+    
+  }
   // 帶入滑鼠游標位置去控制飛機在3D場景位置
   function upadteAirPlan() {
     const targetX = normalizeLimit(mouseMovPos.x,-1,1,-200,300) + scene.gameData.collisionSpeedX
     const targetY = normalizeLimit(mouseMovPos.y,-1,1,-200,200) + scene.gameData.collisionSpeedY
-     // 遊戲game over
-    if (scene.gameData.gameStatus === 'gameOver') {
-      //飛機墜落
-      document.removeEventListener("mousemove",handleMouseMove,false)
-      airPlaneModel.rotation.z += (-Math.PI/2 - airPlaneModel.rotation.z)
-      airPlaneModel.rotation.x += (-Math.PI/2 - airPlaneModel.rotation.z)
-      airPlaneModel.position.x += 1
-      airPlaneModel.position.y -= 3
-    } else {
-        // 飛機實體位置調整
+
+    // 飛機實體位置調整
+    if (scene.gameData.gameStatus!=="gameOver") {
       airPlaneModel.position.x = targetX
       airPlaneModel.position.y = targetY
       airPlaneModel.rotateX(scene.gameData.collisionAngle)
@@ -359,6 +407,10 @@ function updateLevel() {
 const clock = new THREE.Clock(); // 時間數據
 
 function renderLoop() {
+   if (store.state.gameStatus==="reStart") {
+      restartGame()
+      document.addEventListener("mousemove",handleMouseMove,false)
+  }
   if (scene.gameData.collisionSpeedY>0 || scene.gameData.collisionSpeedX <0) {
     scene.gameData.collisionSpeedX += 1 
     scene.gameData.collisionSpeedY -= 1
@@ -394,7 +446,27 @@ function renderLoop() {
     // 飛機位置隨滑鼠移動
     upadteAirPlan()
     // 隕石和碎片擺動
-    if (store.state.gameStatus!=="gameOver") {
+      // 遊戲game over
+    if (scene.gameData.gameStatus === 'gameOver') {
+      //飛機墜落
+      document.removeEventListener("mousemove",handleMouseMove,false)
+      airPlaneModel.rotation.z += (-Math.PI/2 - airPlaneModel.rotation.z)
+      airPlaneModel.rotation.x += (-Math.PI/2 - airPlaneModel.rotation.z)
+      airPlaneModel.position.x += 1
+      airPlaneModel.position.y -= 5
+      
+      //如果相機在follow模式----------
+       if (store.state.cameraOption==="follow") {
+          const relativeCameraOffset = new THREE.Vector3(0, 0, 0);  
+          const cameraOffset = relativeCameraOffset.applyMatrix4(airPlaneModel.matrixWorld );  
+          camera.position.x = cameraOffset.x - 300;  
+          camera.position.y = cameraOffset.y + 100;
+          camera.position.z = cameraOffset.z - 100;
+          controls.target = new THREE.Vector3(0, 0, 0);
+        }
+      //---------
+    } 
+    else if (store.state.gameStatus!=="gameOver") {
        updateDistance()
        updateLevel()
     // 遊戲時間計時器----------

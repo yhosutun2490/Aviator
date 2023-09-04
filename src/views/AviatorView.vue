@@ -37,26 +37,33 @@
       <div class="option-normal" :class="[cameraOption==='normal'?'active': '' ]" @click="changeCamera('normal')">Normal cam</div>
       <div class="option-follow" :class="[cameraOption === 'follow' ? 'active' : '']"  @click="changeCamera('follow')">Follow cam</div>
     </div>
-    <div class="re-play" v-if="gameStatus==='gameOver'">Click To Re-Play</div>
+    <div class="re-play" v-if="gameStatus==='gameOver'" @click="reStartNewGame">Click To Re-Play</div>
     <div id="canvas"></div>
   </main>
 </template>
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed, onMounted, onUpdated } from "vue";
 import createAviator from "../threeScene/createAviator"
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 // import createCannonScene from "../threeScene/createCannonScene";
 
 const store = useStore()
+const router = useRouter()
 onMounted(() => {
   const canvas = document.getElementById('canvas');
   console.log("canvasDom", canvas)
   createAviator(canvas)
+  store.commit('updateGameStatus', 'playing')
 })
+
 
 const cameraOption = computed(()=>store.state.cameraOption)
 function changeCamera(option) {
   store.commit("changeCamera",option)
+}
+function reStartNewGame() {
+  store.commit('updateGameStatus', 'reStart') 
 }
 const gameLevel = computed(() => store.state.gameLevel)
 const flyDistance = computed(()=> store.state.flyDistance)
