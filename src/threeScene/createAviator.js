@@ -232,7 +232,7 @@ coinsHolder.createCoins()
   
   async function loadingFbxModel() {
     // fbx路徑
-    const modelFilePath = 'src/assets/airPlane/'
+    const modelFilePath = 'model/airPlane/'
     const fbxLoader = new FBXLoader()
     // 模型名稱
   const modelName = ['Airplane']
