@@ -37,6 +37,7 @@
       <div class="option-normal" :class="[cameraOption==='normal'?'active': '' ]" @click="changeCamera('normal')">Normal cam</div>
       <div class="option-follow" :class="[cameraOption === 'follow' ? 'active' : '']"  @click="changeCamera('follow')">Follow cam</div>
     </div>
+    <div class="re-play" v-if="gameStatus==='gameOver'">Click To Re-Play</div>
     <div id="canvas"></div>
   </main>
 </template>
@@ -59,6 +60,7 @@ function changeCamera(option) {
 }
 const gameLevel = computed(() => store.state.gameLevel)
 const flyDistance = computed(()=> store.state.flyDistance)
+const gameStatus = computed(()=>store.state.gameStatus)
 </script>
 <style lang="scss" scoped>
 main {
@@ -212,6 +214,14 @@ header {
     width: 120px;
     cursor: pointer;
   }
+}
+.re-play {
+  font-size: 2.5rem;
+  color: #df8f0d;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
 }
 </style>
 

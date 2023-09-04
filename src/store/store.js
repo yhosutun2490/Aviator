@@ -23,6 +23,9 @@ const store = createStore({
     updateDistance (state,payload) {
       state.flyDistance = payload
     },
+    updateGameStatus (state,payload) {
+      state.gameStatus = payload
+    }
   }
 })
 export default store

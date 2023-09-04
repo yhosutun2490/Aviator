@@ -351,7 +351,8 @@ function updateLevel() {
   const circle = document.querySelector('.circle')
   circle.style.strokeDasharray = `${ratio} 189`
    if (scene.gameData.energy<=0) {
-    scene.gameData.gameStatus = "gameOver" 
+    scene.gameData.gameStatus = "gameOver"
+    store.commit("updateGameStatus",'gameOver') 
   }
 }
 
@@ -381,8 +382,8 @@ function renderLoop() {
       camera.position.set(0, -50, 500);
   }
    
-
-	requestAnimationFrame(renderLoop);
+    requestAnimationFrame(renderLoop);
+  
     // const spt = clock.getDelta()*1000;//毫秒
     // 物件旋轉
     // stats.update();
@@ -391,21 +392,28 @@ function renderLoop() {
     // 天空旋轉帶動雲朵
     sky.mesh.rotation.z += 0.005
     // 飛機位置隨滑鼠移動
-    upadteAirPlan()|
+    upadteAirPlan()
     // 隕石和碎片擺動
+    if (store.state.gameStatus!=="gameOver") {
+       updateDistance()
+       updateLevel()
+    // 遊戲時間計時器----------
+     scene.gameData.newTime = new Date().getTime()
+     scene.gameData.deltaTime = scene.gameData.newTime - scene.gameData.oldTime + scene.gameData.timeExtra
+
+      // 遊戲速度控制
+       scene.gameData.speed += scene.gameData.gameBaseSpeed
+    }
     stonesHolder.rotate()
     coinsHolder.rotate()
- 
-
+   
     // cannonDebugRenderer.update()
     // const delta = Math.min(clock, 0.5)
     const timeStemp = 14/1000
     controls.update()
     world.step(timeStemp)
 
-    // 遊戲時間計時器----------
-    scene.gameData.newTime = new Date().getTime()
-    scene.gameData.deltaTime = scene.gameData.newTime - scene.gameData.oldTime + scene.gameData.timeExtra
+   
 
   
     renderer.render( scene, camera );
@@ -455,13 +463,7 @@ function renderLoop() {
      }
     )
     TWEEN.update()
-    updateDistance()
-    updateLevel()
-
-    // 遊戲速度控制
-    scene.gameData.speed += scene.gameData.gameBaseSpeed
-   
-    
+     
 	}
 if (WebGL.isWebGLAvailable()) {
     // Initiate function or other initializations here
