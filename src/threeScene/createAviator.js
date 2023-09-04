@@ -104,6 +104,10 @@ console.log("飛機模型",airPlaneModel,"點光",modelPointLight)
 airPlaneModel.position.x = 0
 airPlaneModel.position.y = 0
 airPlaneModel.position.z = 0
+airPlaneModel.rotateZ(Math.PI/6)
+
+// 飛機原始未移動轉向的matrix
+let originalMatrix = ""
 
 
 restartGame()
@@ -243,17 +247,21 @@ coinsHolder.createCoins()
     gameStatus: "playing",
   }
     store.commit('updateGameStatus',"playing")
-    // 重新調整飛機位置/rotate角度
-    airPlaneModel.position.x = 0
-    airPlaneModel.position.y = 0
-    airPlaneModel.position.z = 0
-    // matrix 恢復預設
-    airPlaneModel.rotateZ(Math.PI/6)
-
+    if (!originalMatrix) {
+      originalMatrix = airPlaneModel.matrix.clone()
+    } else {
+      // 飛機需要恢復到原始轉向matrix角度
+     originalMatrix.decompose(airPlaneModel.position, airPlaneModel.quaternion, airPlaneModel.scale );
+     airPlaneModel.matrix.copy(originalMatrix);
+     airPlaneModel.position.x = 0
+     airPlaneModel.position.y = 0
+     airPlaneModel.position.z = 0
+     airPlaneModel.rotateY(-Math.PI/2)
+     airPlaneModel.scale.set(0.2,0.2,0.2)
+    }
     // 補滿血條energy
     updateEnergyBar()
-     
-    
+ 
   }
   // 帶入滑鼠游標位置去控制飛機在3D場景位置
   function upadteAirPlan() {
